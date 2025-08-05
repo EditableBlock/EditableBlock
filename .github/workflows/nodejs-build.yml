@@ -11,10 +11,9 @@ jobs:
   build-app:                  # 作业 - NodeFlow App 构建部分
     runs-on: ubuntu-latest
     steps:
-    # - name: Env - Checkout
-    #   uses: actions/checkout@v4
+    - name: Env - Checkout
+      uses: actions/checkout@v4
     - name: Checkout - 文档库1
-      working-directory: ./src/
       run: |
         git clone --depth 1 https://${{ secrets.EditableBlockRepo }}@github.com/LincZero/EditableBlock.git
       env:
