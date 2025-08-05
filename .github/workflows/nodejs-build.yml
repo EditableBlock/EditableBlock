@@ -27,9 +27,10 @@ jobs:
       with:
         node-version: '22'
         cache: pnpm
+        cache-dependency-path: ./EditableBlock/pnpm-lock.yaml
     - name: Build
+      working-directory: ./EditableBlock
       run: |
-        cd EditableBlock
         # pnpm app:build
         pnpm install --frozen-lockfile
         pnpm --dir ./src/App build
