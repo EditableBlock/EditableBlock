@@ -8,12 +8,47 @@ on:                           # 触发器，定义何时运行此工作流
   workflow_dispatch:          # 手动执行
 
 jobs:
+  build-obsidian:             # 作业 - Obsidian 子项目构建部分
+    runs-on: ubuntu-latest    # 环境 - 基于镜像
+    steps:                    # 作业步骤！(name是可选的，但我都加上了方便调试和修改)
+    - name: checkout repo
+      uses: actions/checkout@v4   # 检出代码
+    - name: Checkout - 目标库
+      run: |
+        git clone --depth 1 https://${{ secrets.EditableBlockRepo }}@github.com/LincZero/EditableBlock.git
+      env:
+        GH_TOKEN: ${{ secrets.VUEPRESSORG }}
+    - name: Install pnpm          # 安装pnpm (如果你的 package.json::packageManager 字段没有设置，
+      uses: pnpm/action-setup@v4  #   则要在这里加上 with 版本)
+      with:
+        version: 10.10.0
+    - name: env use node.js
+      uses: actions/setup-node@v4 # 配置node环境
+      with:
+        node-version: '22'
+        cache: pnpm
+    - name: build
+      working-directory: ./EditableBlock
+      run: |
+        pnpm install --frozen-lockfile
+        pnpm --dir ./src/EditableBlock_Obsidian build
+        # pnpm ob:build
+    - name: upload build artifact
+      if: always()                      # 即使之前的构建步骤失败，也会上载构建产物
+      uses: actions/upload-artifact@v4  # 保存构建产物 (使用的是官方提供的action)
+      with:
+        name: build-artifact            # 构建产物的名称
+        path: |                         # 构建产物的路径
+          EditableBlock/manifest.json
+          EditableBlock/main.js
+          EditableBlock/styles.css
+
   build-app:                  # 作业 - NodeFlow App 构建部分
     runs-on: ubuntu-latest
     steps:
     - name: Env - Checkout
       uses: actions/checkout@v4
-    - name: Checkout - 文档库1
+    - name: Checkout - 目标库
       run: |
         git clone --depth 1 https://${{ secrets.EditableBlockRepo }}@github.com/LincZero/EditableBlock.git
       env:
